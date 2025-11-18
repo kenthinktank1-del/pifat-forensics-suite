@@ -13,6 +13,7 @@ import CaseList from "./pages/Cases/CaseList";
 import CreateCase from "./pages/Cases/CreateCase";
 import CaseView from "./pages/Cases/CaseView";
 import EvidenceList from "./pages/Evidence/EvidenceList";
+import ImportScriptOutput from "./pages/Evidence/ImportScriptOutput";
 import UserList from "./pages/Users/UserList";
 import AIAnalyzer from "./pages/AI/Analyzer";
 import AcquisitionVisualizer from "./pages/Devices/AcquisitionVisualizer";
@@ -44,6 +45,7 @@ const App = () => (
                           <Route path="/cases/create" element={<CreateCase />} />
                           <Route path="/cases/:id" element={<CaseView />} />
                           <Route path="/evidence" element={<EvidenceList />} />
+                          <Route path="/evidence/import" element={<ImportScriptOutput />} />
                           <Route path="/users" element={<UserList />} />
                           <Route path="/ai/analyzer" element={<AIAnalyzer />} />
                           <Route path="/devices/acquisition" element={<AcquisitionVisualizer />} />
