@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, FileText, Shield, Paperclip } from 'lucide-react';
+import { ArrowLeft, Plus, FileText, Shield, Paperclip, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { casesApi, evidenceApi, notesApi, attachmentsApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { ChainOfCustodyTimeline } from '@/components/evidence/ChainOfCustodyTimeline';
+import { AddChainOfCustodyDialog } from '@/components/evidence/AddChainOfCustodyDialog';
 
 export default function CaseView() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +20,8 @@ export default function CaseView() {
   const [notes, setNotes] = useState<any[]>([]);
   const [attachments, setAttachments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null);
+  const [custodyDialogOpen, setCustodyDialogOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -127,6 +132,10 @@ export default function CaseView() {
             <Paperclip className="mr-2 h-4 w-4" />
             Attachments ({attachments.length})
           </TabsTrigger>
+          <TabsTrigger value="custody">
+            <Clock className="mr-2 h-4 w-4" />
+            Chain of Custody
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="evidence" className="space-y-4">
@@ -149,7 +158,20 @@ export default function CaseView() {
                       <p className="text-sm text-muted-foreground">{item.type}</p>
                       <p className="mt-2">{item.description}</p>
                     </div>
-                    <StatusBadge status={item.status} />
+                    <div className="flex flex-col gap-2 items-end">
+                      <StatusBadge status={item.status} />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedEvidenceId(item.id);
+                          setCustodyDialogOpen(true);
+                        }}
+                      >
+                        <Clock className="mr-2 h-4 w-4" />
+                        View Custody
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -219,7 +241,59 @@ export default function CaseView() {
             )}
           </div>
         </TabsContent>
+
+        <TabsContent value="custody" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Chain of Custody Timeline</h3>
+            <p className="text-sm text-muted-foreground">
+              Select an evidence item to view its custody history
+            </p>
+          </div>
+          {evidence.length > 0 ? (
+            <div className="space-y-6">
+              {evidence.map((item) => (
+                <div key={item.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-primary">{item.evidence_number}</h4>
+                      <p className="text-sm text-muted-foreground">{item.type}</p>
+                    </div>
+                    <AddChainOfCustodyDialog
+                      evidenceId={item.id}
+                      onEntryAdded={loadCaseData}
+                    />
+                  </div>
+                  <ChainOfCustodyTimeline evidenceId={item.id} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center py-8 text-muted-foreground">
+              No evidence items to track
+            </p>
+          )}
+        </TabsContent>
       </Tabs>
+
+      {/* Quick View Dialog for Evidence Custody */}
+      <Dialog open={custodyDialogOpen} onOpenChange={setCustodyDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Chain of Custody</DialogTitle>
+          </DialogHeader>
+          {selectedEvidenceId && (
+            <div className="space-y-4">
+              <div className="flex justify-end">
+                <AddChainOfCustodyDialog
+                  evidenceId={selectedEvidenceId}
+                  onEntryAdded={loadCaseData}
+                />
+              </div>
+              <ChainOfCustodyTimeline evidenceId={selectedEvidenceId} />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -73,9 +73,23 @@ export const evidenceApi = {
   },
 
   create: async (evidenceData: any) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Create initial chain of custody entry
+    const initialCustodyEntry = {
+      action: 'Evidence Collected',
+      performed_by: user.id,
+      timestamp: new Date().toISOString(),
+      notes: 'Initial evidence collection',
+    };
+
     const { data, error } = await supabase
       .from('evidence')
-      .insert(evidenceData)
+      .insert({
+        ...evidenceData,
+        chain_of_custody: [initialCustodyEntry],
+      })
       .select()
       .single();
     if (error) throw error;
