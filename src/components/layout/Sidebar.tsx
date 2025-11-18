@@ -1,4 +1,4 @@
-import { Home, FolderOpen, FileText, Users, Shield, Activity, Database } from 'lucide-react';
+import { Home, FolderOpen, FileText, Users, Shield, Activity, Database, Upload } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAdmin } from '@/hooks/useAdmin';
 import {
@@ -28,6 +28,7 @@ export function Sidebar() {
   const advancedItems = [
     { title: 'AI Analyzer', url: '/ai/analyzer', icon: Activity },
     { title: 'Device Acquisition', url: '/devices/acquisition', icon: Database },
+    { title: 'Import Evidence', url: '/evidence/import', icon: Upload },
   ];
 
   const adminItems = [
